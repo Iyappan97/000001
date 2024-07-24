@@ -87,7 +87,7 @@ resource "kubernetes_service" "nginx" {
   }
   spec {
     selector = {
-      App = kubernetes_deployment.nginx.spec.0.template.0.metadata.labels.App
+      App = kubernetes_deployment.nginx.spec.0.template.0.metadata[0].labels.App
     }
     port {
       port        = 80
