@@ -15,7 +15,7 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git branch: 'main', url: 'https://github.com/Iyappan97/000001.git'
+                            git branch: 'main', url: 'https://github.com/Iyappan97/Terraform_Eks_cluster.git'
                         }
                     }
                 }
