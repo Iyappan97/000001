@@ -5,13 +5,13 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Jenkins credentials ID
         DOCKER_IMAGE_NAME = 'iyappansam97/myreactapp'
         DOCKER_TAG = 'latest'
-        WORKSPACE_DIR = '/var/lib/jenkins/workspace/SUCCESS_CICD/'  // Path to the workspace directory pipeline job name important
+        WORKSPACE_DIR = '/var/lib/jenkins/workspace/###job##name###/'  // Path to the workspace directory pipeline job name important
         DOCKERFILE_PATH = "${env.WORKSPACE_DIR}/Dockerfile"  // Full path to the Dockerfile
         BUILD_CONTEXT = "${env.WORKSPACE_DIR}"  // Build context directory
         HOME = "${env.WORKSPACE}"
         PATH = "${env.WORKSPACE}/bin:${env.PATH}"
         AWS_REGION = 'us-east-1'
-        EKS_CLUSTER_NAME = ''
+        EKS_CLUSTER_NAME = '#########clustername#######'
         AWS_CREDENTIALS = credentials('aws-credentials') // Use the credentials ID here
         
     }
