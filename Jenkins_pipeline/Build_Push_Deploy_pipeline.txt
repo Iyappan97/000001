@@ -11,7 +11,7 @@ pipeline {
         HOME = "${env.WORKSPACE}"
         PATH = "${env.WORKSPACE}/bin:${env.PATH}"
         AWS_REGION = 'us-east-1'
-        EKS_CLUSTER_NAME = 'education-eks-CTyHPjJ6'
+        EKS_CLUSTER_NAME = ''
         AWS_CREDENTIALS = credentials('aws-credentials') // Use the credentials ID here
         
     }
@@ -110,6 +110,7 @@ pipeline {
             steps {
                 script {
                     sh 'kubectl rollout restart deployment/scalable-nginx-example'
+                    sh 'kubectl get svc'
                 }
             }
         }
