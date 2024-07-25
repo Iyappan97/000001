@@ -1,9 +1,9 @@
 #!/bin/bash
 # Learn Terraform - Provision an EKS Cluster
 
-This repo is a companion repo to the [Provision an EKS Cluster tutorial](https://developer.hashicorp.com/terraform/tutorials/kubernetes/eks), containing
-Terraform configuration files to provision an EKS cluster on AWS.
-
+# prerequisites 
+# create access key and secret key for aws console
+# create a buket with name mentioned in backend tf file
 
 # create a VM / local ubuntu machine
 # local is preffered because cloud vm is slower when processing jenkins
