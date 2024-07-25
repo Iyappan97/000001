@@ -1,0 +1,131 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Jenkins credentials ID
+        DOCKER_IMAGE_NAME = 'iyappansam97/myreactapp'
+        DOCKER_TAG = 'latest'
+        WORKSPACE_DIR = '/var/lib/jenkins/workspace/SUCCESS_CICD/'  // Path to the workspace directory
+        DOCKERFILE_PATH = "${env.WORKSPACE_DIR}/Dockerfile"  // Full path to the Dockerfile
+        BUILD_CONTEXT = "${env.WORKSPACE_DIR}"  // Build context directory
+        HOME = "${env.WORKSPACE}"
+        PATH = "${env.WORKSPACE}/bin:${env.PATH}"
+        AWS_REGION = 'us-east-1'
+        EKS_CLUSTER_NAME = 'education-eks-CTyHPjJ6'
+        AWS_CREDENTIALS = credentials('aws-credentials') // Use the credentials ID here
+        
+    }
+
+    stages {
+        
+        stage('Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/Iyappan97/react-app-test.git'
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Check if Dockerfile exists
+                    if (!fileExists(env.DOCKERFILE_PATH)) {
+                        error "Dockerfile not found at ${env.DOCKERFILE_PATH}"
+                    }
+                    // Build Docker image
+                    sh "docker build -t ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG} ."
+                }
+            }
+        }
+        
+        stage('Login to DockerHub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id', usernameVariable: 'DOCKERHUB_USR', passwordVariable: 'DOCKERHUB_PSW')]) {
+                        sh 'echo $DOCKERHUB_PSW | docker login -u $DOCKERHUB_USR --password-stdin'
+                    }
+                }
+            }
+        }
+        
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh 'docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}'
+                }
+            }
+        }
+        stage('Setup AWS CLI') {
+            steps {
+                script {
+                    // Set AWS configuration
+                    sh """
+                    mkdir -p ~/.aws
+                    echo '[default]' > ~/.aws/config
+                    echo 'region = ${AWS_REGION}' >> ~/.aws/config
+                    echo '[default]' > ~/.aws/credentials
+                    echo 'aws_access_key_id = ${AWS_CREDENTIALS_USR}' >> ~/.aws/credentials
+                    echo 'aws_secret_access_key = ${AWS_CREDENTIALS_PSW}' >> ~/.aws/credentials
+                    """
+                }
+            }
+        }
+
+        stage('Download and Install kubectl') {
+            steps {
+                script {
+                    // Download kubectl
+                    sh 'curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.28.8/2024-04-19/bin/linux/amd64/kubectl'
+                    // Make kubectl executable
+                    sh 'chmod +x ./kubectl'
+                    // Create bin directory in workspace and copy kubectl there
+                    sh 'mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl'
+                    // Add bin directory to PATH
+                    sh 'echo "export PATH=$HOME/bin:$PATH" >> ~/.bashrc'
+                    // Ensure the PATH is updated in the current session
+                    sh 'export PATH=$HOME/bin:$PATH'
+                }
+            }
+        }
+
+        stage('Update kubeconfig') {
+            steps {
+                script {
+                    // Update kubeconfig for EKS
+                    sh 'aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}'
+                }
+            }
+        }
+
+        stage('Verify kubectl Installation') {
+            steps {
+                script {
+                    // Verify kubectl version
+                    sh 'kubectl version --client'
+                }
+            }
+        }
+        
+        
+        stage('Trigger Kubernetes Rollout') {
+            steps {
+                script {
+                    sh 'kubectl rollout restart deployment/scalable-nginx-example'
+                }
+            }
+        }
+        
+        stage('Cleanup Docker Images') {
+            steps {
+                script {
+                    sh 'docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f'
+                }
+            }
+        }
+        
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+    }
+}
