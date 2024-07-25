@@ -5,9 +5,8 @@ This repo is a companion repo to the [Provision an EKS Cluster tutorial](https:/
 Terraform configuration files to provision an EKS cluster on AWS.
 
 
-# configures jenkins
-login in jenkins server (local/VM on cloud)
-follow the following cmd 
+# create a VM / local ubuntu machine
+# local is preffered because cloud vm is slower when processing jenkins
 
 # change the directory to /opt/
 cd ../../
@@ -21,6 +20,11 @@ apt-get update
 
 # Install zip
 apt install zip -y
+
+# install java
+add-apt-repository ppa:openjdk-r/ppa
+apt-get update
+apt-get install -y fontconfig openjdk-17-jre openjdk-17-jdk
 
 # install tar
 apt install tar
@@ -51,12 +55,25 @@ bash /tmp/installTerraform.sh
 # for ARM systems, set ARCH to: `arm64`, `armv6` or `armv7`
 ARCH=amd64
 PLATFORM=$(uname -s)_$ARCH
-
 curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
-
 # (Optional) Verify checksum
 curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_checksums.txt" | grep $PLATFORM | sha256sum --check
-
 tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+mv /tmp/eksctl /usr/local/bin
 
-sudo mv /tmp/eksctl /usr/local/bin
+# install jenkins in the console
+wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+apt-get update
+apt-get install jenkins
+
+# configuring jenkins privilege to run docker cmds
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+groups jenkins
+
+# login in into jenkins server
+# install following plugins : Docker pipeline , terraform
+# configure tools with their appropriate env 
+# configure credentials 
+# Modify credentials id in pipeline script 
