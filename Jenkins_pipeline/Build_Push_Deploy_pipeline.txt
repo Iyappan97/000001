@@ -11,7 +11,7 @@ pipeline {
         HOME = "${env.WORKSPACE}"
         PATH = "${env.WORKSPACE}/bin:${env.PATH}"
         AWS_REGION = 'us-east-1'
-        EKS_CLUSTER_NAME = '#########clustername#######'
+        EKS_CLUSTER_NAME = 'education-eks-5C35ASrW'
         AWS_CREDENTIALS = credentials('aws-credentials') // Use the credentials ID here
         
     }
