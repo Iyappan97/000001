@@ -1,20 +1,3 @@
-#!/bin/bash
-# Learn Terraform - Provision an EKS Cluster
-
-# prerequisites 
-# create access key and secret key for aws console
-# create a buket with name mentioned in backend tf file
-
-# create a VM / local ubuntu machine
-# local is preffered because cloud vm is slower when processing jenkins
-
-# change the directory to /opt/
-cd ../../
-cd /opt/
-
-# switch to sudo user 
-sudo su
-
 # update the vm
 apt-get update
 
