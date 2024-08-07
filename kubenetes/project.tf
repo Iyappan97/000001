@@ -90,12 +90,14 @@ resource "kubernetes_service" "nginx" {
       App = kubernetes_deployment.nginx.spec.0.template.0.metadata[0].labels.App
     }
     port {
+      name        = "http"  // Name for LoadBalancer port
       port        = 80
-      target_port = 80  // Update to match the container port
+      target_port = 80
     }
     port {
+      name        = "nodeport"  // Name for NodePort
       port        = 30008
-      target_port = 80  // Same target port for NodePort
+      target_port = 80
       node_port    = 30008  // NodePort configuration
     }
 
