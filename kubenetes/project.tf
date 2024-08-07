@@ -73,7 +73,7 @@ resource "kubernetes_deployment" "nginx" {
           image_pull_policy = "Always"  // Ensure always pulling the latest image
 
           port {
-            container_port = 80
+            container_port = 80  // Update to match the container port
           }    
         }
       }
@@ -85,18 +85,20 @@ resource "kubernetes_service" "nginx" {
   metadata {
     name = "nginx-example"
   }
-
   spec {
     selector = {
       App = kubernetes_deployment.nginx.spec.0.template.0.metadata[0].labels.App
     }
-
     port {
       port        = 80
-      target_port = 80
-      node_port    = 30008
+      target_port = 80  // Update to match the container port
+    }
+    port {
+      port        = 30008
+      target_port = 80  // Same target port for NodePort
+      node_port    = 30008  // NodePort configuration
     }
 
-    type = "NodePort"
+    type = "LoadBalancer"  // Expose the service externally via LoadBalancer
   }
 }
